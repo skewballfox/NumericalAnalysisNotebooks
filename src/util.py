@@ -1,5 +1,6 @@
 from typing import Callable, Tuple, List
 import numpy as np
+from numpy.typing import ArrayLike
 
 
 def bisect(
@@ -113,3 +114,43 @@ def bairstow(coefficients, u0, v0, TOL, itmax):
     u += du
     v += dv
     return (u, v)
+
+
+# credits to the medium post on polynomial interpolation in python
+# https://towardsdatascience.com/polynomial-interpolation-3463ea4b63dd
+
+
+def _poly_newton_coefficient(x: ArrayLike, y: ArrayLike) -> np.ndarray:
+    """
+    x: list or np array contanining x data points
+    y: list or np array contanining y data points
+    """
+
+    m = len(x)
+
+    x = np.copy(x)
+    a = np.copy(y)
+    for k in range(1, m):
+        a[k:m] = (a[k:m] - a[k - 1]) / (x[k:m] - x[k - 1])
+
+    return a
+
+
+def newton_polynomial(
+    x_data: ArrayLike,
+    y_data: ArrayLike,
+    x,
+):
+    """
+    x_data: data points at x
+    y_data: data points at y
+    x: evaluation point(s)
+    """
+    a = _poly_newton_coefficient(x_data, y_data)
+    n = len(x_data) - 1  # Degree of polynomial
+    p = a[n]
+
+    for k in range(1, n + 1):
+        p = a[n - k] + (x - x_data[n - k]) * p
+
+    return p
